@@ -39,5 +39,18 @@ jobs:
           push: true
           tags: ${{ secrets.ACR_NAME }}.azurecr.io/spring-boot-app:latest
 
-
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    steps:
+      - name: Deploy via SSH to Azure VM
+        uses: appleboy/ssh-action@v1.20
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}          # Public IP/DNS of your Azure VM
+          username: azureuser                         # Default user for Azure VMs
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}        # Private key stored in GitHub Secrets
+          script: |
+            cd /path/to/your/app                      # Go to your app folder
+            docker compose pull
+            docker compose up -d --force-recreate
 
