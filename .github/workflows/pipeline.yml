@@ -44,7 +44,7 @@ jobs:
     needs: docker-build-push
     steps:
       - name: Deploy via SSH to Azure VM
-        uses: appleboy/ssh-action@v1.20
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.AZURE_VM_HOST }}          # Public IP/DNS of your Azure VM
           username: azureuser                         # Default user for Azure VMs
