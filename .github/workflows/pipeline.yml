@@ -27,8 +27,8 @@ jobs:
               "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
             }
 
-      # Log in to ACR
-      - name: Azure Container Registry  Login
+      # Log in to Azure Container Registry
+      - name: Azure Container Registry Login
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
       # Build and Push Docker image to ACR
@@ -46,11 +46,19 @@ jobs:
       - name: Deploy via SSH to Azure VM
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.AZURE_VM_HOST }}          # Public IP/DNS of your Azure VM
-          username: azureuser                         # Default user for Azure VMs
-          key: ${{ secrets.AZURE_VM_SSH_KEY }}        # Private key stored in GitHub Secrets
+          host: ${{ secrets.AZURE_VM_HOST }}           # Public IP/DNS of Azure VM
+          username: azureuser                          # Default VM user
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}         # Private key stored in GitHub Secrets
           script: |
-            cd /path/to/your/app                      # Go to your app folder
+            # Login to ACR from VM (required for private images)
+            docker login ${{ secrets.ACR_NAME }}.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
+            
+            # Navigate to app folder
+            cd /path/to/your/app
+            
+            # Pull latest image and recreate containers
             docker compose pull
             docker compose up -d --force-recreate
+
+            
 
